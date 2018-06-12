@@ -1,0 +1,111 @@
+<!doctype html>
+<meta charset=utf8>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<div>
+  <textarea id=editor_json style="display:block;height:150px;width:1000px;"></textarea>
+  <button onclick="displayInteractions()">Display</button>
+  <div id="test_content" style="margin:15px 0;"></div>
+  <div id="exam_content"></div>
+</div>
+<link rel=stylesheet href="./css/test.css">
+
+<script>
+
+  var lessonsDone = [];
+
+  function lessonMark(e) {
+    lessonsDone.push('Lesson ' + (parseInt(e.target.name) + 1));
+    displayExams();
+  }
+
+  function displayInteractions() {
+    const json = JSON.parse(document.getElementById("editor_json").value);
+    var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'test'));
+    const doc = document.getElementById("test_content");
+    tests.forEach((test, i) => {
+      test.filter(c => c.type === 'test').forEach(c => {
+        c.content.forEach(cc => {
+          if (cc.type === 'question') {
+            var d = document.createElement("div");
+            d.innerText = "Question: " + cc.content[0].text;
+            doc.appendChild(d);
+          }
+          if (cc.type === 'answer') {
+            var d = document.createElement("div");
+            d.style = "margin: 8px 0;";
+            doc.appendChild(d);
+            var radio = document.createElement("input");
+            if (c.attrs.type === 'multi-choice') {
+              radio.type = 'checkbox';
+            } else {
+              radio.name ="name_radio" + i;
+              radio.type = 'radio';
+            }
+            d.appendChild(radio);
+            var lbl = document.createElement("span");
+            lbl.innerText = cc.content[0].text;
+            d.appendChild(lbl);
+          }
+        });
+      });
+      var btn = document.createElement("button");
+      btn.innerHTML = "Submit";
+      btn.name = i;
+      btn.onclick = lessonMark;
+      btn.style = "margin-top: 15px;";
+      doc.appendChild(btn);
+    });
+    displayExams();
+  }
+
+  function displayExams() {
+    const json = JSON.parse(document.getElementById("editor_json").value);
+    var exam = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'exam'));
+    const ex = document.getElementById("exam_content");
+    ex.innerHTML = '';
+    var disabled = false;
+    exam.forEach((exam, i) => {
+      exam.filter(c => c.type === 'entryCondition').forEach(c => {
+        c.attrs.conditions.forEach(cc => {
+          if (cc.name === 'completed_lessons') {
+            disabled = cc.lessons.some(l => {
+              return lessonsDone.indexOf(l) < 0;
+            })
+          }
+        });
+      });
+      exam.filter(c => c.type === 'exam').forEach(c => {
+        c.content.forEach(cc => {
+          if (cc.type === 'question') {
+            var d = document.createElement("div");
+            d.style = "margin-bottom: 10px;";
+            d.innerText = "Question: " + cc.content[0].text;
+            ex.appendChild(d);
+          }
+          if (cc.type === 'answer') {
+            var d = document.createElement("div");
+            ex.appendChild(d);
+            var lbl = document.createElement("span");
+            lbl.innerText = 'Answer: ';
+            d.appendChild(lbl);
+            var input = document.createElement("input");
+            input.className = "question_input";
+            input.disabled = disabled;
+            if (disabled === true) {
+              input.style = "background: lightgray;"
+            } else {
+              input.style = "background: white;"
+            }
+            d.appendChild(input);
+          }
+        });
+      });
+      if (disabled === true) {
+        ex.style = "background: lightgray;"
+      } else {
+        ex.style = "background: white;"
+      }
+    });
+  }
+</script>

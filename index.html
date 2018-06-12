@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset=utf8>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<header class=frontpage>
+  <select id="editor_version" style="margin-bottom: 15px" onchange="changeVersion()">
+    <option>Select version</option>
+  </select>
+  <div id=editor></div>
+  <div id=toolbar style="position: relative;"></div>
+  <button id=json value=JSON style="position: relative;">Save</button>
+  <div id=jsonText style="white-space: pre;"></div>
+</header>
+
+
+<div style="display: none" id="content">
+  <h3>SelfStudy Plus</h3>
+  <p>SelfStudy Prosemirror Prototype.</p>
+</div>
+
+<link rel=stylesheet href="./css/editor.css">
+<script src="./js/index.js"></script>

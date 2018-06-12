@@ -1,0 +1,11 @@
+#exam_content {
+  background: lightgray;
+  padding: 20px 10px;
+  border-radius: 3px;
+}
+.question_input {
+  background: lightgray;
+  width: 85%;
+  border: 1px solid #adabab;
+  margin-top: 10px;
+}
