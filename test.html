@@ -16,6 +16,7 @@
 
   function lessonMark(e) {
     lessonsDone.push('Lesson ' + (parseInt(e.target.name) + 1));
+    displayInteractions();
     displayExams();
   }
 
@@ -23,18 +24,31 @@
     const json = JSON.parse(document.getElementById("editor_json").value);
     var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'test'));
     const doc = document.getElementById("test_content");
+    doc.innerHTML = null;
     tests.forEach((test, i) => {
+      var disabled = false;
+      test.filter(ce => ce.type === 'entryCondition').forEach(cf => {
+        cf.attrs.conditions.forEach(ccf => {
+          if (ccf.name === 'completed_lessons') {
+            disabled = ccf.lessons.some(l => {
+              return lessonsDone.indexOf(l) < 0;
+            })
+          }
+        });
+      });
       test.filter(c => c.type === 'test').forEach(c => {
-        c.content.forEach(cc => {
+        var tt = document.createElement("div");
+        doc.appendChild(tt);
+        c.content && c.content.forEach(cc => {
           if (cc.type === 'question') {
             var d = document.createElement("div");
-            d.innerText = "Question: " + cc.content[0].text;
-            doc.appendChild(d);
+            d.innerText = "Question: " + (cc.content && cc.content[0].text);
+            tt.appendChild(d);
           }
           if (cc.type === 'answer') {
             var d = document.createElement("div");
             d.style = "margin: 8px 0;";
-            doc.appendChild(d);
+            tt.appendChild(d);
             var radio = document.createElement("input");
             if (c.attrs.type === 'multi-choice') {
               radio.type = 'checkbox';
@@ -42,10 +56,16 @@
               radio.name ="name_radio" + i;
               radio.type = 'radio';
             }
+            radio.disabled = disabled;
             d.appendChild(radio);
             var lbl = document.createElement("span");
-            lbl.innerText = cc.content[0].text;
+            lbl.innerText = cc.content && cc.content[0].text;
             d.appendChild(lbl);
+          }
+          if (disabled === true) {
+            tt.style = "background: lightgray;"
+          } else {
+            tt.style = "background: white;"
           }
         });
       });
@@ -53,7 +73,7 @@
       btn.innerHTML = "Submit";
       btn.name = i;
       btn.onclick = lessonMark;
-      btn.style = "margin-top: 15px;";
+      btn.style = "margin-bottom: 15px;";
       doc.appendChild(btn);
     });
     displayExams();
@@ -61,7 +81,7 @@
 
   function displayExams() {
     const json = JSON.parse(document.getElementById("editor_json").value);
-    var exam = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'exam'));
+    var exam = json.content && json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'exam'));
     const ex = document.getElementById("exam_content");
     ex.innerHTML = '';
     var disabled = false;
@@ -76,11 +96,11 @@
         });
       });
       exam.filter(c => c.type === 'exam').forEach(c => {
-        c.content.forEach(cc => {
+        c.content && c.content.forEach(cc => {
           if (cc.type === 'question') {
             var d = document.createElement("div");
             d.style = "margin-bottom: 10px;";
-            d.innerText = "Question: " + cc.content[0].text;
+            d.innerText = "Question: " + (cc.content && cc.content[0].text);
             ex.appendChild(d);
           }
           if (cc.type === 'answer') {
