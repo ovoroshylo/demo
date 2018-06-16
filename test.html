@@ -16,7 +16,7 @@
   var disabledInt = [];
 
   function lessonMark(e) {
-    lessonsDone.push('Lesson ' + (parseInt(e.target.name) + 1));
+    lessonsDone.push(e.target.name);
     enableInteractions();
   }
 
@@ -78,13 +78,13 @@
             tt.style = "background: white;"
           }
         });
+        var btn = document.createElement("button");
+        btn.innerHTML = "Submit";
+        btn.name = c.attrs.id;
+        btn.onclick = lessonMark;
+        btn.style = "margin-bottom: 50px;";
+        doc.appendChild(btn);
       });
-      var btn = document.createElement("button");
-      btn.innerHTML = "Submit";
-      btn.name = i;
-      btn.onclick = lessonMark;
-      btn.style = "margin-bottom: 50px;";
-      doc.appendChild(btn);
       if (disRec.lessons) disabledInt.push(disRec);
     });
     displayExams();
@@ -92,7 +92,7 @@
 
   function enableInteractions() {
     disabledInt.forEach(int => {
-      var disabled = int.lessons.some(l => lessonsDone.indexOf(l) < 0);
+      var disabled = int.lessons.some(l => lessonsDone.indexOf(l.value) < 0);
       if (!disabled) {
         int.elm.style = "background: white;"
         var elms = int.elm.getElementsByTagName('input')
@@ -113,7 +113,6 @@
     exam.forEach((exam, i) => {
       var disRec = {};
       var title = exam.filter(con => con.type === 'title')[0];
-      console.log(exam, title)
       var tit = document.createElement("div");
       tit.innerHTML = 'Title: ' + (title.content ? title.content[0].text : '');
       tit.style="font-weight: bold;text-decoration: underline;"
