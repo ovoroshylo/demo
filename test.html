@@ -25,9 +25,17 @@
     var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'test'));
     const doc = document.getElementById("test_content");
     doc.innerHTML = null;
+
     tests.forEach((test, i) => {
       var disRec = {};
       var disabled = false;
+      var title = test.filter(con => con.type === 'title')[0];
+      var tt = document.createElement("div");
+      doc.appendChild(tt);
+      var tit = document.createElement("div");
+      tit.innerHTML = 'Title: ' + (title.content ? title.content[0].text : '');
+      tit.style="font-weight: bold;text-decoration: underline;"
+      tt.appendChild(tit);
       test.filter(ce => ce.type === 'entryCondition').forEach(cf => {
         cf.attrs.conditions.forEach(ccf => {
           if (ccf.name === 'completed_lessons') {
@@ -39,9 +47,8 @@
         });
       });
       test.filter(c => c.type === 'test').forEach(c => {
-        var tt = document.createElement("div");
         disRec.elm = tt;
-        doc.appendChild(tt);
+
         c.content && c.content.forEach(cc => {
           if (cc.type === 'question') {
             var d = document.createElement("div");
@@ -76,7 +83,7 @@
       btn.innerHTML = "Submit";
       btn.name = i;
       btn.onclick = lessonMark;
-      btn.style = "margin-bottom: 15px;";
+      btn.style = "margin-bottom: 50px;";
       doc.appendChild(btn);
       if (disRec.lessons) disabledInt.push(disRec);
     });
@@ -105,6 +112,12 @@
     var disabled = false;
     exam.forEach((exam, i) => {
       var disRec = {};
+      var title = exam.filter(con => con.type === 'title')[0];
+      console.log(exam, title)
+      var tit = document.createElement("div");
+      tit.innerHTML = 'Title: ' + (title.content ? title.content[0].text : '');
+      tit.style="font-weight: bold;text-decoration: underline;"
+      ex.appendChild(tit);
       exam.filter(c => c.type === 'entryCondition').forEach(c => {
         c.attrs.conditions.forEach(cc => {
           if (cc.name === 'completed_lessons') {

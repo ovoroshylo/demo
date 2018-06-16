@@ -335,6 +335,20 @@ li.ProseMirror-selectednode:after {
   margin-bottom: 15px;
 }
 
+.ss_title {
+  background: lightsteelblue;
+  border-radius: 3px;
+  padding: 10px 35px;
+  margin-bottom: 15px;
+  position: relative;
+}
+.ss_title::after { 
+  content: "Title: ";
+  position: absolute;
+  top: 25%;
+  left: 0;
+}
+
 .ss_test {
   border-radius: 3px;
   overflow: hidden;
