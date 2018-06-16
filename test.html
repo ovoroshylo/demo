@@ -13,11 +13,11 @@
 <script>
 
   var lessonsDone = [];
+  var disabledInt = [];
 
   function lessonMark(e) {
     lessonsDone.push('Lesson ' + (parseInt(e.target.name) + 1));
-    displayInteractions();
-    displayExams();
+    enableInteractions();
   }
 
   function displayInteractions() {
@@ -26,10 +26,12 @@
     const doc = document.getElementById("test_content");
     doc.innerHTML = null;
     tests.forEach((test, i) => {
+      var disRec = {};
       var disabled = false;
       test.filter(ce => ce.type === 'entryCondition').forEach(cf => {
         cf.attrs.conditions.forEach(ccf => {
           if (ccf.name === 'completed_lessons') {
+            disRec.lessons = ccf.lessons;
             disabled = ccf.lessons.some(l => {
               return lessonsDone.indexOf(l) < 0;
             })
@@ -38,6 +40,7 @@
       });
       test.filter(c => c.type === 'test').forEach(c => {
         var tt = document.createElement("div");
+        disRec.elm = tt;
         doc.appendChild(tt);
         c.content && c.content.forEach(cc => {
           if (cc.type === 'question') {
@@ -75,8 +78,23 @@
       btn.onclick = lessonMark;
       btn.style = "margin-bottom: 15px;";
       doc.appendChild(btn);
+      if (disRec.lessons) disabledInt.push(disRec);
     });
     displayExams();
+  }
+
+  function enableInteractions() {
+    disabledInt.forEach(int => {
+      var disabled = int.lessons.some(l => lessonsDone.indexOf(l) < 0);
+      if (!disabled) {
+        int.elm.style = "background: white;"
+        var elms = int.elm.getElementsByTagName('input')
+        for(var i = 0;i < elms.length;i++) {
+          elms[i].disabled = false;
+          elms[i].style = "background: white;"
+        }
+      }
+    });
   }
 
   function displayExams() {
@@ -86,9 +104,11 @@
     ex.innerHTML = '';
     var disabled = false;
     exam.forEach((exam, i) => {
+      var disRec = {};
       exam.filter(c => c.type === 'entryCondition').forEach(c => {
         c.attrs.conditions.forEach(cc => {
           if (cc.name === 'completed_lessons') {
+            disRec.lessons = cc.lessons;
             disabled = cc.lessons.some(l => {
               return lessonsDone.indexOf(l) < 0;
             })
@@ -96,6 +116,7 @@
         });
       });
       exam.filter(c => c.type === 'exam').forEach(c => {
+        disRec.elm = ex;
         c.content && c.content.forEach(cc => {
           if (cc.type === 'question') {
             var d = document.createElement("div");
@@ -126,6 +147,7 @@
       } else {
         ex.style = "background: white;"
       }
+      if (disRec.lessons) disabledInt.push(disRec);
     });
   }
 </script>
