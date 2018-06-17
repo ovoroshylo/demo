@@ -362,6 +362,20 @@ li.ProseMirror-selectednode:after {
   padding: 15px 20px;
 }
 
+.ss_correct {
+  position: relative;
+  padding: 5px 0 5px 120px;
+}
+.ss_correct::after {
+  content: "Correct answer: ";
+  position: absolute;
+  top: 25%;
+  left: 0;
+}
+.ss_correct > input {
+  margin-right: 15px;
+}
+
 .ss_exit_condition {
   width: 75%;
   margin: 0 15px;

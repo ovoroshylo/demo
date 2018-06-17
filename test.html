@@ -16,8 +16,22 @@
   var disabledInt = [];
 
   function lessonMark(e) {
-    lessonsDone.push(e.target.name);
-    enableInteractions();
+    var testName = e.target.name;
+    const json = JSON.parse(document.getElementById("editor_json").value);
+    var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'test' && con.attrs.id === testName));
+    var corVal = tests[0].filter(con => con.type === 'test').map(con => con.content)[0].filter(cc => cc.type === "correctAnswerSingle").map(cc => cc.attrs.value)[0];
+    var elms = document.getElementsByName(testName);
+    for (var i = 0;i < elms.length - 1;i++) {
+      if (i === parseInt(corVal)) {
+        if (elms[i].checked) {
+          e.target.style = "margin-bottom: 50px;border: 2px solid lightgreen;";
+          lessonsDone.push(e.target.name);
+          enableInteractions();
+        } else {
+          e.target.style = "margin-bottom: 50px;border: 2px solid red;";
+        }
+      }
+    }
   }
 
   function displayInteractions() {
@@ -49,7 +63,7 @@
       test.filter(c => c.type === 'test').forEach(c => {
         disRec.elm = tt;
 
-        c.content && c.content.forEach(cc => {
+        c.content && c.content.forEach((cc,i) => {
           if (cc.type === 'question') {
             var d = document.createElement("div");
             d.innerText = "Question: " + (cc.content && cc.content[0].text);
@@ -63,7 +77,8 @@
             if (c.attrs.type === 'multi-choice') {
               radio.type = 'checkbox';
             } else {
-              radio.name ="name_radio" + i;
+              radio.name = c.attrs.id;
+              radio.value = i;
               radio.type = 'radio';
             }
             radio.disabled = disabled;
