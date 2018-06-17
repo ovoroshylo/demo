@@ -57,6 +57,18 @@
     }
   }
 
+  function submitTest(e) {
+    const json = JSON.parse(document.getElementById("editor_json").value);
+    var exam = json.content && json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'exam'));
+    var val = exam[0].filter(con => (con.type === 'exam')).map(con => con.content)[0].filter(cc => cc.type === "answer").map(cc => cc.content[0].text)[0];
+    var ans = document.getElementById('test_answer').value;
+    if (ans.indexOf(val) >= 0) {
+      e.target.style = "margin-bottom: 50px;border: 2px solid lightgreen;";
+    } else {
+      e.target.style = "margin-bottom: 50px;border: 2px solid red;";
+    }
+  }
+
   function displayInteractions() {
     const json = JSON.parse(document.getElementById("editor_json").value);
     var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => (con.type === 'test' || con.type === 'multitest')));
@@ -181,6 +193,7 @@
             lbl.innerText = 'Answer: ';
             d.appendChild(lbl);
             var input = document.createElement("input");
+            input.id = "test_answer"
             input.className = "question_input";
             input.disabled = disabled;
             if (disabled === true) {
@@ -191,6 +204,12 @@
             d.appendChild(input);
           }
         });
+        var btn = document.createElement("button");
+        btn.innerHTML = "Submit";
+        btn.name = c.attrs.id;
+        btn.onclick = submitTest;
+        btn.style = "margin-bottom: 50px;";
+        ex.appendChild(btn);
       });
       if (disabled === true) {
         ex.style = "background: lightgray;"
