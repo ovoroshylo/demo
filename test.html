@@ -18,11 +18,11 @@
   function lessonMark(e) {
     var testName = e.target.name;
     const json = JSON.parse(document.getElementById("editor_json").value);
-    var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'test' && con.attrs.id === testName));
-    var corVal = tests[0].filter(con => con.type === 'test').map(con => con.content)[0].filter(cc => cc.type === "correctAnswerSingle").map(cc => cc.attrs.value)[0];
+    var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => (con.type === 'test' || con.type === 'multitest') && con.attrs.id === testName));
+    var corVal = tests[0].filter(con => (con.type === 'test')).map(con => con.content)[0].filter(cc => cc.type === "correctAnswerSingle").map(cc => cc.attrs.value)[0];
     var elms = document.getElementsByName(testName);
     for (var i = 0;i < elms.length - 1;i++) {
-      if (i === parseInt(corVal)) {
+      if (typeof corVal === 'string' && i === parseInt(corVal)) {
         if (elms[i].checked) {
           e.target.style = "margin-bottom: 50px;border: 2px solid lightgreen;";
           lessonsDone.push(e.target.name);
@@ -34,9 +34,32 @@
     }
   }
 
+  function lessonMarkMulti(e) {
+    var testName = e.target.name;
+    const json = JSON.parse(document.getElementById("editor_json").value);
+    var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => (con.type === 'test' || con.type === 'multitest') && con.attrs.id === testName));
+    var corVal = tests[0].filter(con => (con.type === 'multitest')).map(con => con.content)[0].filter(cc => cc.type === "correctAnswerMulti").map(cc => cc.attrs.value)[0];
+    var elms = document.getElementsByName(testName);
+    var correct = true;
+    for (var i = 0;i < elms.length - 1;i++) {
+      if (corVal.indexOf(i) >= 0) {
+        if (!elms[i].checked) {
+          correct = false;
+        }
+      }
+    }
+    if (correct) {
+      e.target.style = "margin-bottom: 50px;border: 2px solid lightgreen;";
+      lessonsDone.push(e.target.name);
+      enableInteractions();
+    } else {
+      e.target.style = "margin-bottom: 50px;border: 2px solid red;";
+    }
+  }
+
   function displayInteractions() {
     const json = JSON.parse(document.getElementById("editor_json").value);
-    var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => con.type === 'test'));
+    var tests = json.content.filter(c => c.type === 'document').map(con => con.content).filter(c => c.some(con => (con.type === 'test' || con.type === 'multitest')));
     const doc = document.getElementById("test_content");
     doc.innerHTML = null;
 
@@ -60,7 +83,7 @@
           }
         });
       });
-      test.filter(c => c.type === 'test').forEach(c => {
+      test.filter(c => (c.type === 'test' || c.type === 'multitest')).forEach(c => {
         disRec.elm = tt;
 
         c.content && c.content.forEach((cc,i) => {
@@ -74,11 +97,11 @@
             d.style = "margin: 8px 0;";
             tt.appendChild(d);
             var radio = document.createElement("input");
-            if (c.attrs.type === 'multi-choice') {
+            radio.name = c.attrs.id;
+            radio.value = i;
+            if (c.type === 'multitest') {
               radio.type = 'checkbox';
             } else {
-              radio.name = c.attrs.id;
-              radio.value = i;
               radio.type = 'radio';
             }
             radio.disabled = disabled;
@@ -96,7 +119,7 @@
         var btn = document.createElement("button");
         btn.innerHTML = "Submit";
         btn.name = c.attrs.id;
-        btn.onclick = lessonMark;
+        btn.onclick = c.type === 'test'? lessonMark : lessonMarkMulti;
         btn.style = "margin-bottom: 50px;";
         doc.appendChild(btn);
       });
